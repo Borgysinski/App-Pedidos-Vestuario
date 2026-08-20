@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Estoque</title>
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body>
+  <div class="container">
+    <img src="logo.png" alt="Logo Estoque" class="logo">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="E-mail" required />
+      <input type="password" id="password" placeholder="Senha" required />
+      <button type="submit">Entrar</button>
+      <p id="error" class="error"></p>
+    </form>
+  </div>
+</body>
+
+  <!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCXJB3YlPq-XL0MlNQiIE6CmQinIgnybzA",
+  authDomain: "estoque-de-natal-bat.firebaseapp.com",
+  projectId: "estoque-de-natal-bat",
+  storageBucket: "estoque-de-natal-bat.firebasestorage.app",
+  messagingSenderId: "20584382737",
+  appId: "1:20584382737:web:d46e4dc5bef5f50c29ccb0",
+  measurementId: "G-H61PW8D225"
+};
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const errorEl = document.getElementById('error');
+
+    loginForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(() => {
+          window.location.href = 'admin.html'; // sua página protegida
+        })
+        .catch((error) => {
+          errorEl.textContent = "Login inválido";
+          console.error(error);
+        });
+    });
+  </script>
+</body>
+</html>

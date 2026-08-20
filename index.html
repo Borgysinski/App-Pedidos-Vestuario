@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estoque Moda</title>
+
+  <!-- Estilo principal -->
+  <link rel="stylesheet" href="principal.css" />
+
+  <!-- Firebase SDKs (Compat) para Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-database-compat.js"></script>
+  <script>
+    // Mesma configuração do admin
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXJB3YlPq-XL0MlNQiIE6CmQinIgnybzA",
+      authDomain: "estoque-de-natal-bat.firebaseapp.com",
+      projectId: "estoque-de-natal-bat",
+      storageBucket: "estoque-de-natal-bat.firebasestorage.app",
+      messagingSenderId: "20584382737",
+      appId: "1:20584382737:web:d46e4dc5bef5f50c29ccb0",
+      measurementId: "G-H61PW8D225"
+    };
+
+    if (!firebase.apps?.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  </script>
+</head>
+<body>
+  <div class="superior">
+    <figure id="logo_BAT">
+      <img src="Midias/logo.png" alt="BAT" />
+    </figure>
+    <h2>Linha Vestuário</h2>
+  </div>
+
+  <div class="container">
+    <h1>Grades Disponíveis</h1>
+    <div id="inventory">
+      <!-- Conteúdo gerado dinamicamente -->
+    </div>
+
+    <div class="botoes">
+      <button class="btn" onclick="window.location.href='login.html'">Ir para Admin</button>
+    </div>
+  </div>
+
+  <!-- Script principal -->
+  <script src="principal.js"></script>
+</body>
+</html>

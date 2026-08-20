@@ -1,0 +1,347 @@
+:root {
+  --header-height: 80px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #6a97ac;
+}
+
+.superior {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height);
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 1000;
+  padding: 0 20px;
+}
+
+/* ==========================================================
+   LAYOUT: menu lateral + conteúdo
+   ========================================================== */
+
+.admin-layout {
+  display: flex;
+  margin-top: var(--header-height);
+  min-height: calc(100vh - var(--header-height));
+}
+
+.admin-menu {
+  width: 220px;
+  flex-shrink: 0;
+  background-color: #fff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  position: sticky;
+  top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+}
+
+.menu-item {
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 14px 20px;
+  font-size: 15px;
+  cursor: pointer;
+  color: #333;
+  border-left: 4px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.menu-item:hover {
+  background-color: #f2f2f2;
+}
+
+.menu-item.ativo {
+  background-color: #eaf4ff;
+  border-left-color: #036fc8;
+  font-weight: bold;
+  color: #036fc8;
+}
+
+.menu-rodape {
+  margin-top: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.menu-rodape a {
+  text-align: center;
+  text-decoration: none;
+  color: #007BFF;
+  font-size: 14px;
+}
+
+.menu-rodape button {
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e74c3c;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.admin-conteudo {
+  flex: 1;
+  padding: 30px;
+  max-width: 1000px;
+}
+
+.secao-admin {
+  display: none;
+}
+
+.secao-admin.ativa {
+  display: block;
+}
+
+h1 {
+  margin-top: 0;
+}
+
+.secao-descricao {
+  color: #f0f0f0;
+  margin-top: -10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* ==========================================================
+   GRUPOS E ITENS (compartilhado entre check-in e estoque atual)
+   ========================================================== */
+
+.group {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.group h2 {
+  text-align: center;
+  color: rgb(71, 82, 88);
+  font-size: 20px;
+  margin-top: 0;
+}
+
+.items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.item {
+  text-align: left;
+  margin: 10px;
+}
+
+/* Visualização somente leitura (Estoque Atual) */
+.item-visualizacao {
+  background-color: #f7f7f7;
+  border-radius: 6px;
+  padding: 10px 14px;
+  min-width: 180px;
+  text-align: center;
+}
+
+.item-visual-nome {
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.item-visual-qtd {
+  font-weight: bold;
+  font-size: 15px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.estoque-ok {
+  background-color: #d4f5dd;
+  color: #1e7e34;
+}
+
+.estoque-baixo {
+  background-color: #fff3cd;
+  color: #8a6d00;
+}
+
+.estoque-zerado {
+  background-color: #f8d7da;
+  color: #a71d2a;
+}
+
+/* ==========================================================
+   BOTÕES GERAIS
+   ========================================================== */
+
+button#saveBtn {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  background-color: #036fc8;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+button#saveBtn:hover {
+  opacity: 0.9;
+}
+
+/* ==========================================================
+   SEÇÃO PEDIDOS
+   ========================================================== */
+
+.filtro-pedidos {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filtro-btn {
+  padding: 6px 14px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.filtro-btn.ativo {
+  background-color: #036fc8;
+  color: #fff;
+  border-color: #036fc8;
+}
+
+.sem-pedidos {
+  color: #f0f0f0;
+}
+
+.pedido-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.pedido-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pedido-status {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.status-pendente {
+  background-color: #fff3cd;
+  color: #8a6d00;
+}
+
+.status-atendido {
+  background-color: #d4f5dd;
+  color: #1e7e34;
+}
+
+.pedido-data {
+  font-size: 12px;
+  color: #777;
+}
+
+.pedido-itens {
+  margin: 0 0 10px;
+  padding-left: 20px;
+  font-size: 14px;
+  color: #333;
+}
+
+.pedido-total {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.btn-status-pedido {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #036fc8;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-status-pedido:hover {
+  opacity: 0.9;
+}
+
+/* ==========================================================
+   RESPONSIVO — CELULAR
+   ========================================================== */
+@media (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-menu {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+  }
+
+  .menu-item {
+    border-left: none;
+    border-bottom: 4px solid transparent;
+    white-space: nowrap;
+  }
+
+  .menu-item.ativo {
+    border-left-color: transparent;
+    border-bottom-color: #036fc8;
+  }
+
+  .menu-rodape {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 10px;
+    padding: 10px;
+  }
+
+  .admin-conteudo {
+    padding: 16px;
+  }
+}

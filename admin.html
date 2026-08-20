@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Painel</title>
+  <link rel="stylesheet" href="adm.css">
+
+  <!-- Firebase SDKs compatíveis -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCXJB3YlPq-XL0MlNQiIE6CmQinIgnybzA",
+      authDomain: "estoque-de-natal-bat.firebaseapp.com",
+      projectId: "estoque-de-natal-bat",
+      storageBucket: "estoque-de-natal-bat.firebasestorage.app",
+      messagingSenderId: "20584382737",
+      appId: "1:20584382737:web:d46e4dc5bef5f50c29ccb0",
+      measurementId: "G-H61PW8D225"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Proteção de rota: só acessa se estiver logado
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="superior">
+    <h2>Painel Administrativo</h2>
+  </div>
+
+  <div class="admin-layout">
+    <!-- Menu lateral -->
+    <nav class="admin-menu">
+      <button class="menu-item ativo" data-secao="checkin">📥 Check-in de Estoque</button>
+      <button class="menu-item" data-secao="estoque">📦 Estoque Atual</button>
+      <button class="menu-item" data-secao="pedidos">🧾 Pedidos</button>
+
+      <div class="menu-rodape">
+        <a href="index.html">Voltar para a Loja</a>
+        <button id="logoutBtn">Sair</button>
+      </div>
+    </nav>
+
+    <!-- Conteúdo principal -->
+    <main class="admin-conteudo">
+
+      <!-- SEÇÃO: Check-in de Estoque (atualizar quantidades) -->
+      <section id="secao-checkin" class="secao-admin ativa">
+        <h1>Check-in de Estoque</h1>
+        <p class="secao-descricao">Ajuste a quantidade de cada grade e clique em "Salvar Alterações".</p>
+        <div id="adminInventory"></div>
+        <button id="saveBtn">Salvar Alterações</button>
+      </section>
+
+      <!-- SEÇÃO: Estoque Atual (somente visualização) -->
+      <section id="secao-estoque" class="secao-admin">
+        <h1>Estoque Atual</h1>
+        <p class="secao-descricao">Visão geral do que está disponível agora, atualizado em tempo real.</p>
+        <div id="estoqueAtual"></div>
+      </section>
+
+      <!-- SEÇÃO: Pedidos recebidos -->
+      <section id="secao-pedidos" class="secao-admin">
+        <h1>Pedidos</h1>
+        <p class="secao-descricao">Pedidos enviados pelos clientes pela loja, mais recentes primeiro.</p>
+        <div class="filtro-pedidos">
+          <button class="filtro-btn ativo" data-filtro="todos">Todos</button>
+          <button class="filtro-btn" data-filtro="pendente">Pendentes</button>
+          <button class="filtro-btn" data-filtro="atendido">Atendidos</button>
+        </div>
+        <div id="listaPedidos"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="admin.js"></script>
+
+  <!-- Botão de logout -->
+  <script>
+    const logoutBtn = document.getElementById("logoutBtn");
+    logoutBtn.addEventListener("click", () => {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    });
+  </script>
+</body>
+</html>
