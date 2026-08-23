@@ -15,13 +15,14 @@
   <script>
     // Configuração do Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyCXJB3YlPq-XL0MlNQiIE6CmQinIgnybzA",
-      authDomain: "estoque-de-natal-bat.firebaseapp.com",
-      projectId: "estoque-de-natal-bat",
-      storageBucket: "estoque-de-natal-bat.firebasestorage.app",
-      messagingSenderId: "20584382737",
-      appId: "1:20584382737:web:d46e4dc5bef5f50c29ccb0",
-      measurementId: "G-H61PW8D225"
+      apiKey: "AIzaSyCxsqKjPi1O25enIji-fWvq7-kZOwuJ2QQ",
+      authDomain: "app-pedidos-vestuarios.firebaseapp.com",
+      databaseURL: "https://app-pedidos-vestuarios-default-rtdb.firebaseio.com",
+      projectId: "app-pedidos-vestuarios",
+      storageBucket: "app-pedidos-vestuarios.firebasestorage.app",
+      messagingSenderId: "116610221117",
+      appId: "1:116610221117:web:3c24744d7af7270bddd654",
+      measurementId: "G-4N8Y32LNR3"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -41,15 +42,30 @@
   </div>
 
   <div class="admin-layout">
-    <!-- Menu lateral -->
+    <!-- Menu lateral (vira barra fixa inferior no celular) -->
     <nav class="admin-menu">
-      <button class="menu-item ativo" data-secao="checkin">📥 Check-in de Estoque</button>
-      <button class="menu-item" data-secao="estoque">📦 Estoque Atual</button>
-      <button class="menu-item" data-secao="pedidos">🧾 Pedidos</button>
+      <button class="menu-item ativo" data-secao="checkin">
+        <span class="menu-icon">📥</span>
+        <span class="menu-label">Check-in de Estoque</span>
+      </button>
+      <button class="menu-item" data-secao="estoque">
+        <span class="menu-icon">📦</span>
+        <span class="menu-label">Estoque Atual</span>
+      </button>
+      <button class="menu-item" data-secao="pedidos">
+        <span class="menu-icon">🧾</span>
+        <span class="menu-label">Pedidos</span>
+      </button>
 
       <div class="menu-rodape">
-        <a href="index.html">Voltar para a Loja</a>
-        <button id="logoutBtn">Sair</button>
+        <a href="index.html">
+          <span class="menu-icon">🏬</span>
+          <span class="menu-label">Voltar para a Loja</span>
+        </a>
+        <button id="logoutBtn">
+          <span class="menu-icon">🚪</span>
+          <span class="menu-label">Sair</span>
+        </button>
       </div>
     </nav>
 

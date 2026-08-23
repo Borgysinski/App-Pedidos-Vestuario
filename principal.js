@@ -1,16 +1,16 @@
 function getGroups() {
   const defaultGroups = [
     { name: "Calças Cargo<br>Grade com 14 peças<br>Distribuição: 2 P • 4 M • 4 G • 4 GG", items: [
-      { name: "Grade Calças Cargo Preta", image: "Midias/Calças Cargo/Preta.jpg", quantity: 1, cor: "#2e2e2e" },
-      { name: "Grade Calças Cargo Caqui", image: "Midias/Calças Cargo/Caqui.png", quantity: 1, cor: "#a8945f" },
-      { name: "Grade Calças Cargo Areia", image: "Midias/Calças Cargo/Areia.jpg", quantity: 1, cor: "#d8c8a0" },
-      { name: "Grade Calças Cargo Castor", image: "Midias/Calças Cargo/Castor.png", quantity: 1, cor: "#7c6a54" },
-      { name: "Grade Calças Cargo Verde Militar", image: "Midias/Calças Cargo/Verde.jpg", quantity: 1, cor: "#4b5d3a" },
-      { name: "Grade Calças Cargo Azul Marinho", image: "Midias/Calças Cargo/Marinho.png", quantity: 1, cor: "#1c2d4f" },
-      { name: "Grade Calças Cargo Cinza", image: "Midias/Calças Cargo/Cinza.png", quantity: 1, cor: "#6b6f76" },
+      { name: "Grade Calças Cargo Preta", image: "Midias/Calças Cargo/Preta.jpg", quantity: 0, cor: "#2e2e2e" },
+      { name: "Grade Calças Cargo Caqui", image: "Midias/Calças Cargo/Caqui.png", quantity: 0, cor: "#a49262" },
+      { name: "Grade Calças Cargo Areia", image: "Midias/Calças Cargo/Areia.jpg", quantity: 0, cor: "#ded4bd" },
+      { name: "Grade Calças Cargo Castor", image: "Midias/Calças Cargo/Castor.png", quantity: 0, cor: "#766551" },
+      { name: "Grade Calças Cargo Verde Militar", image: "Midias/Calças Cargo/Verde.jpg", quantity: 0, cor: "#5D6532" },
+      { name: "Grade Calças Cargo Azul Marinho", image: "Midias/Calças Cargo/Marinho.png", quantity: 0, cor: "#1c2d4f" },
+      { name: "Grade Calças Cargo Cinza", image: "Midias/Calças Cargo/Cinza.png", quantity: 0, cor: "#6a6d72" },
     ]},
     { name: "Bermudas Cargo<br>Grade com 14 peças<br>Distribuição: 2 P • 4 M • 4 G • 4 GG", items: [
-    { name: "Grade Bermudas Cargo Preta", image: "Midias/Bermudas Cargo/Preta.png", quantity: 1, cor: "#2e2e2e" },
+      { name: "Grade Bermudas Cargo Preta", image: "Midias/Bermudas Cargo/Preta.png", quantity: 0, cor: "#2e2e2e" },
     ]},
     { name: "Calças Cargo Plus Size<br>Grade com 12 peças<br>Distribuição: 3 G1 • 3 G2 • 3 G3 • 3 G4", items: [
 
@@ -29,12 +29,26 @@ function getGroups() {
 // Mantém os grupos em memória para aplicar atualizações em tempo real
 let groups = getGroups();
 
+// Gera o mesmo ID de produto usado no admin, a partir do nome do item
+// (compartilhado entre o listener de estoque e a reserva no checkout)
+function makeProdutoId(groupName, itemName) {
+  const stripHtml = (s) => (s || '').replace(/<[^>]*>/g, ' ');
+  const base = `${stripHtml(itemName)}`;
+  return base
+    .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+    .replace(/[.#$\[\]\//]/g, '-')
+    .replace(/\s+/g, '_')
+    .replace(/_{2,}/g, '_')
+    .trim()
+    .toLowerCase();
+}
+
 // ==========================================================
 // CARRINHO DE COMPRAS
 // ==========================================================
 
 // 🔗 Número de WhatsApp que vai receber o pedido final (DDI+DDD+numero, só números)
-const NUMERO_WHATSAPP = "5511999999999"; // <-- troque pelo seu número
+const NUMERO_WHATSAPP = "5519974264534"; // <-- troque pelo seu número
 
 // Carrinho em memória: cada item = { chave, name, image, groupName, quantity, estoqueDisponivel, cor }
 let carrinho = [];
@@ -152,17 +166,84 @@ async function salvarPedidoNoFirebase() {
   }
 }
 
+// Tenta reservar (debitar) o estoque de cada item do carrinho de forma atômica.
+// Usa transação do Firebase: se dois clientes tentarem levar a última unidade ao
+// mesmo tempo, o Firebase garante que só um dos dois consiga debitar com sucesso.
+// Retorna um array com o resultado de cada item (sucesso ou não).
+function reservarEstoqueCarrinho() {
+  const tentativas = carrinho.map((c) => {
+    const produtoId = makeProdutoId(c.groupName, c.name);
+    const ref = firebase.database().ref('estoque/' + produtoId + '/quantity');
+
+    return ref.transaction((quantidadeAtual) => {
+      const atual = Number.isFinite(quantidadeAtual) ? quantidadeAtual : parseInt(quantidadeAtual || 0, 10);
+      if (isNaN(atual) || atual < c.quantity) {
+        // Retornar undefined aborta a transação sem alterar nada no banco
+        return;
+      }
+      return atual - c.quantity;
+    }).then((resultado) => ({
+      nome: c.name,
+      quantidadeSolicitada: c.quantity,
+      produtoId,
+      sucesso: !!resultado.committed
+    }));
+  });
+
+  return Promise.all(tentativas);
+}
+
+// Desfaz reservas que já tinham dado certo, devolvendo a quantidade ao estoque.
+// Usado quando algum OUTRO item do mesmo carrinho falhou, para não deixar
+// unidades "presas" reservadas para um pedido que não vai ser enviado.
+function devolverEstoqueReservado(itensParaDevolver) {
+  const devolucoes = itensParaDevolver.map((item) => {
+    const ref = firebase.database().ref('estoque/' + item.produtoId + '/quantity');
+    return ref.transaction((quantidadeAtual) => {
+      const atual = Number.isFinite(quantidadeAtual) ? quantidadeAtual : parseInt(quantidadeAtual || 0, 10);
+      return (isNaN(atual) ? 0 : atual) + item.quantidadeSolicitada;
+    });
+  });
+  return Promise.all(devolucoes);
+}
+
 async function finalizarPedido() {
   if (carrinho.length === 0) {
     alert("Seu carrinho está vazio. Ajuste a quantidade de alguma grade antes de finalizar.");
     return;
   }
 
+  await garantirAutenticacaoCliente();
+
+  const resultados = await reservarEstoqueCarrinho();
+  const falhas = resultados.filter((r) => !r.sucesso);
+
+  if (falhas.length > 0) {
+    // Devolve ao estoque o que já tinha sido reservado com sucesso, já que o
+    // pedido inteiro não vai ser enviado (evita "prender" estoque à toa)
+    const sucessos = resultados.filter((r) => r.sucesso);
+    if (sucessos.length > 0) {
+      await devolverEstoqueReservado(sucessos);
+    }
+
+    const nomesFalha = falhas
+      .map((f) => f.nome.replace(/<[^>]*>/g, " ").trim())
+      .join(", ");
+    alert(`Ops! Enquanto você finalizava, o estoque mudou e não há mais quantidade suficiente de: ${nomesFalha}. Ajuste a quantidade no carrinho e tente novamente.`);
+    return;
+  }
+
+  // Todos os itens foram reservados com sucesso — agora sim registra o pedido e avisa no WhatsApp
   await salvarPedidoNoFirebase();
 
   const mensagem = encodeURIComponent(montarMensagemPedido());
   const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${mensagem}`;
   window.open(url, "_blank");
+
+  // Limpa o carrinho, já que o estoque foi debitado de verdade
+  carrinho = [];
+  renderCarrinho();
+  sincronizarInputsCatalogo();
 }
 
 // ---- UI do carrinho (criada dinamicamente, sem precisar mexer no HTML) ----
@@ -432,67 +513,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
 console.log("principal.js carregado");
 
-// Assina cada item individualmente, evitando dependência de leitura no nó pai
+// Assina cada item individualmente, evitando dependência de leitura no nó pai.
+// Cada item lê diretamente seu próprio valor no Firebase; se não existir NENHUM
+// dado lá, o padrão é 0 (nunca o valor fixo do código) — assim um estoque vazio
+// nunca aparece como "disponível" por engano.
 (function initRealtimeEstoquePorItem() {
   if (typeof firebase === 'undefined' || !firebase?.apps?.length) {
     console.error('Firebase não inicializado no principal. Verifique os scripts e a configuração em index.html.');
     return;
   }
 
-  // Mesmo algoritmo de chave do admin
-  function makeProdutoId(groupName, itemName) {
-    const stripHtml = (s) => (s || '').replace(/<[^>]*>/g, ' ');
-    const base = `${stripHtml(itemName)}`;
-    return base
-      .normalize('NFD').replace(/\p{Diacritic}/gu, '')
-      .replace(/[.#$\[\]\//]/g, '-')
-      .replace(/\s+/g, '_')
-      .replace(/_{2,}/g, '_')
-      .trim()
-      .toLowerCase();
-  }
-
-  const dados = {}; // produtoId -> payload
-  const listeners = []; // para eventual cleanup
-
-  function applyAndRender() {
-    // Mapa por nome (para aplicar no grid); se vazio, mantém quantidades atuais (default)
-    const qtyMap = new Map(Object.values(dados).map(v => [
-      String(v.name || '').trim(),
-      Number.isFinite(v.quantity) ? v.quantity : parseInt(v.quantity || 0, 10)
-    ]));
-
-    // Aplica nas quantidades do grid
-    groups.forEach(g => {
-      g.items.forEach(it => {
-        const k = String(it.name || '').trim();
-        if (qtyMap.size > 0 && qtyMap.has(k)) {
-          const q = qtyMap.get(k);
-          it.quantity = isNaN(q) ? 0 : q;
-        } else if (qtyMap.size > 0) {
-          it.quantity = 0;
-        }
-      });
-    });
-    renderInventory();
-  }
-
-  // Cria listeners por item conhecido nos grupos
-  groups.forEach(g => {
-    g.items.forEach(it => {
+  groups.forEach((g) => {
+    g.items.forEach((it) => {
       const produtoId = makeProdutoId(g.name, it.name);
       const ref = firebase.database().ref('estoque/' + produtoId);
-      const cb = (snap) => {
+      ref.on('value', function (snap) {
         const val = snap.val();
-        if (val) {
-          dados[produtoId] = val;
-        } else {
-          delete dados[produtoId];
-        }
-        applyAndRender();
-      };
-      ref.on('value', cb, (err) => console.error('Listener item erro:', produtoId, err));
-      listeners.push({ ref, cb });
+        const qty = val ? (Number.isFinite(val.quantity) ? val.quantity : parseInt(val.quantity || 0, 10)) : 0;
+        it.quantity = isNaN(qty) ? 0 : qty;
+        renderInventory();
+      }, function (err) {
+        console.error('Erro ao escutar item', produtoId, err);
+      });
     });
   });
 })();
