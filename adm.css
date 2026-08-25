@@ -337,6 +337,7 @@ button#saveBtn:hover {
 
   .admin-menu {
     position: fixed;
+    top: auto;
     bottom: 0;
     left: 0;
     width: 100%;
@@ -404,4 +405,34 @@ button#saveBtn:hover {
     padding: 16px;
     padding-bottom: 100px; /* espaço pra não ficar escondido atrás da barra fixa */
   }
+}
+.stepper-qtd {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+  width: fit-content;
+  margin-top: 6px;
+}
+
+.btn-qtd-menos,
+.btn-qtd-mais {
+  border: none;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  background-color: #486d8c;
+}
+
+.input-qtd-item {
+  width: 46px;
+  height: 32px;
+  border: none;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  text-align: center;
 }

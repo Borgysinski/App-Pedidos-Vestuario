@@ -89,26 +89,54 @@ function renderAdminInventory() {
     const itemsDiv = document.createElement("div");
     itemsDiv.className = "items";
 
-    group.items.forEach((item, iIndex) => {
-      const itemDiv = document.createElement("div");
-      itemDiv.className = "item";
+group.items.forEach((item, iIndex) => {
+  const itemDiv = document.createElement("div");
+  itemDiv.className = "item";
 
-      itemDiv.innerHTML = `
-        <label>
-          ${item.name}<br>
-          <input type="number"
-                 min="0"
-                 value="${item.quantity || 0}"
-                 data-group="${gIndex}"
-                 data-index="${iIndex}"
-                 style="width: 60px; text-align: center;">
-          Grades
-        </label>
-      `;
+  const nome = document.createElement("div");
+  nome.textContent = item.name;
 
-      itemsDiv.appendChild(itemDiv);
-    });
+  const stepper = document.createElement("div");
+  stepper.className = "stepper-qtd";
 
+  const btnMenos = document.createElement("button");
+  btnMenos.type = "button";
+  btnMenos.className = "btn-qtd-menos";
+  btnMenos.textContent = "−";
+
+  const input = document.createElement("input");
+  input.type = "number";
+  input.min = "0";
+  input.value = item.quantity || 0;
+  input.className = "input-qtd-item";
+  input.dataset.group = gIndex;
+  input.dataset.index = iIndex;
+
+  const btnMais = document.createElement("button");
+  btnMais.type = "button";
+  btnMais.className = "btn-qtd-mais";
+  btnMais.textContent = "+";
+
+  btnMenos.addEventListener("click", () => {
+    const novoValor = Math.max(0, parseInt(input.value || 0, 10) - 1);
+    input.value = novoValor;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
+  btnMais.addEventListener("click", () => {
+    const novoValor = parseInt(input.value || 0, 10) + 1;
+    input.value = novoValor;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
+  stepper.appendChild(btnMenos);
+  stepper.appendChild(input);
+  stepper.appendChild(btnMais);
+
+  itemDiv.appendChild(nome);
+  itemDiv.appendChild(stepper);
+  itemsDiv.appendChild(itemDiv);
+});
     groupDiv.appendChild(itemsDiv);
     adminInventoryDiv.appendChild(groupDiv);
   });
